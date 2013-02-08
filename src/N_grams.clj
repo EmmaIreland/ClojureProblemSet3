@@ -4,16 +4,18 @@
 ;; and generates a map of tri-gram counts.
 
 
-(defn 3-grams-helper [coll]
-  (loop [words coll 3-grams-list []]
+(defn tri-grams-helper [coll]
+  (loop [words coll tri-grams-list []]
     (if (<= (count words) 3)
-      (conj 3-grams-list words)
-      (recur (subvec words 1) (conj [] (subvec words 0 3)))
+      (conj tri-grams-list words)
+      (recur (subvec words 1) (conj tri-grams-list (subvec words 0 3)))
       )
     )
   )
 
-(defn 3-grams [files]
-  (let [split #(clojure.string/split % #"\s")]
-  (map #(3-grams-helper %)  files)
-  ))
+(defn tri-grams [files]
+  (let [split-by-whitelines #(clojure.string/split % #"\s")]
+  (apply merge-with +(map #(frequencies %) 
+                          (map #(tri-grams-helper (filterv #(not (= "" %)) (split-by-whitelines (slurp %)))) files)))
+  )
+)
