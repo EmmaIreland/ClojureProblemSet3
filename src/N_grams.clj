@@ -13,9 +13,26 @@
     )
   )
 
+(defn tri-grams-parallel [coll numBlocks]
+  (let [makeList (apply merge-with + 
+                          (pmap #(filterv (fn [x] (not (= "" x))) (clojure.string/split (slurp %) #"\s")) 
+                               coll)
+                        )
+        numChars (count (makeList coll))
+        blockSize (quot numChars numBlocks)
+        extractBlock (fn [blockNumber]
+                       (subvec (makeList coll) (* blockNumber blockSize) (* (inc blockNumber) blockSize)))
+        partials (pmap (comp tri-grams-helper extractBlock) (range numBlocks))
+        ]
+    partials)
+  )
+
 (defn tri-grams [files]
   (let [split-by-whitelines #(clojure.string/split % #"\s")]
-  (apply merge-with +(map #(frequencies %) 
-                          (map #(tri-grams-helper (filterv #(not (= "" %)) (split-by-whitelines (slurp %)))) files)))
+    (apply merge-with +(map #(frequencies %) 
+                          (map #(tri-grams-helper (filterv (fn [x] (not (= "" x))) (split-by-whitelines (slurp %))) ) 
+                               files)
+                        )
+    )
   )
 )
