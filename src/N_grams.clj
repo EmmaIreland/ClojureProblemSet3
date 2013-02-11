@@ -13,19 +13,6 @@
     )
   )
 
-(defn tri-grams-parallel [coll numBlocks]
-  (let [makeList (apply merge-with + 
-                          (pmap #(filterv (fn [x] (not (= "" x))) (clojure.string/split (slurp %) #"\s")) 
-                               coll)
-                        )
-        numChars (count (makeList coll))
-        blockSize (quot numChars numBlocks)
-        extractBlock (fn [blockNumber]
-                       (subvec (makeList coll) (* blockNumber blockSize) (* (inc blockNumber) blockSize)))
-        partials (pmap (comp tri-grams-helper extractBlock) (range numBlocks))
-        ]
-    partials)
-  )
 
 (defn tri-grams [files]
   (let [split-by-whitelines #(clojure.string/split % #"\s")]
@@ -36,3 +23,15 @@
     )
   )
 )
+
+
+;; Regular version of tri-grams
+;; "Elapsed time: 369.589437 msecs"
+;; "Elapsed time: 223.049432 msecs"
+;; "Elapsed time: 216.928432 msecs"
+
+(defn run-timing [n]
+  (let [s ["/home/irela065/Desktop/AllsWellThatEndsWell.txt" "/home/irela065/Desktop/AsYouLikeIt.txt"
+                               "/home/irela065/Desktop/ClojureRemoveLines.txt" "/home/irela065/Desktop/ComedyOfErrors.txt"
+                               "/home/irela065/Desktop/Cymbeline.txt" "/home/irela065/Desktop/LovesLaboursLost.txt"]]
+    (time (tri-grams s))))
